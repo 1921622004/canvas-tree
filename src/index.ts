@@ -1,8 +1,11 @@
+import RedBlackTree from "./tree";
+
 let canvas = document.createElement('canvas');
-canvas.height = 500;
-canvas.width = 500;
+canvas.height = 1000;
+canvas.width = 1080;
 document.body.appendChild(canvas);
 let ctx = canvas.getContext('2d');
+let rbTree = new RedBlackTree(ctx);
 
 (function () {
   let addInput: HTMLInputElement = document.querySelector('#add-input');
@@ -14,6 +17,7 @@ let ctx = canvas.getContext('2d');
     if (!inputVal || !inputVal.trim()) return;
     let num = parseInt(inputVal);
     if (isNaN(num)) return;
+    rbTree.add(num);
   })
   removeBtn.addEventListener('click', () => {
     let removeVal = removeInput.value;
