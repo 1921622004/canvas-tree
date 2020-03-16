@@ -1,11 +1,17 @@
+import { Scene } from "spritejs";
 import RedBlackTree from "./tree";
 
-let canvas = document.createElement('canvas');
-canvas.height = 1000;
-canvas.width = 1080;
-document.body.appendChild(canvas);
-let ctx = canvas.getContext('2d');
-let rbTree = new RedBlackTree(ctx);
+
+let container = document.querySelector('#stage');
+const scene = new Scene({
+  container,
+  width: 1200,
+  height: 1000,
+  mode: 'stickyTop'
+});
+console.log(scene);
+
+let rbTree = new RedBlackTree(scene.layer());
 
 (function () {
   let addInput: HTMLInputElement = document.querySelector('#add-input');

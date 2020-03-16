@@ -1,4 +1,5 @@
 import TreeNode from "./treeNode";
+import { Scene, Polyline, Layer } from "spritejs";
 
 export enum ReturnFlag {
   CONTINUE_LOOP = 1,
@@ -22,6 +23,7 @@ export const performWorkAtNode = (node: TreeNode, works: Work[], arg: any) => {
   function next(i: number) {
     index = i;
     let curWork = works[i];
+    if (!curWork) return;
     setTimeout(() => {
       let { node: returnNode, flag, res } = curWork(node, arg);
       arg = res;
@@ -57,24 +59,28 @@ export function clearArcFun(x: number, y: number, r: number, cxt: CanvasRenderin
 }
 
 
-export function drawLineBetweenNodes(parent: TreeNode, child: TreeNode, ctx: CanvasRenderingContext2D) {
-  let { pX: parentX, pY: parentY } = parent;
-  let { pX: childX, pY: childY } = child;
+export function drawLineBetweenNodes(parent: TreeNode, child: TreeNode, layer: Layer) {
+  let [parentX, parentY] = parent.position;
+  let [childX, childY] = child.position;
+  console.log(parent.position, child.position);
+
   let isLeftChild = parent.val > child.val;
   let a = Math.abs(parentX - childX);
   let b = Math.abs(parentY - childY);
   let c = Math.sqrt(a * a + b * b);
-  ctx.beginPath();
-  let startX = isLeftChild ? parent.pX - a / c * 25 : parent.pX + a / c * 25;
+  let startX = isLeftChild ? parentX - a / c * 25 : parentX + a / c * 25;
   console.log('startX: ', startX);
-  let startY = parent.pY + b / c * 25;
+  let startY = parentY + b / c * 25;
   console.log('startY: ', startY);
-  let endX = isLeftChild ? child.pX + a / c * 25 : child.pX - a / c * 25;
+  let endX = isLeftChild ? childX + a / c * 25 : childX - a / c * 25;
   console.log('endX: ', endX);
-  let endY = child.pY - b / c * 25;
+  let endY = childY - b / c * 25;
   console.log('endY: ', endY);
-  ctx.moveTo(startX, startY);
-  ctx.lineTo(endX, endY);
-  ctx.stroke();
-  ctx.closePath();
+  let line = new Polyline({
+    points: [startX, startY, endX, endY],
+    smooth: false,
+    strokeColor: '#000'
+  });
+  isLeftChild ? parent.leftLine = line : parent.rightLine = line;
+  layer.append(line);
 }

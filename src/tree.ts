@@ -1,11 +1,12 @@
 import TreeNode from "./treeNode"
 import { performWorkAtNode, ReturnFlag, drawLineBetweenNodes } from "./utils";
+import { Scene, Layer } from "spritejs";
 
 class RedBlackTree {
   private root: TreeNode = null;
-  private startPX = 250;
+  private startPX = 600;
   private startPY = 25;
-  constructor(private ctx: CanvasRenderingContext2D) {
+  constructor(private layer: Layer) {
   }
 
   add = (val: number): void => {
@@ -14,31 +15,35 @@ class RedBlackTree {
       if (!node) {
         let newNode: TreeNode;
         if (!arg) {
-          newNode = new TreeNode(this.ctx, val, this.startPX, this.startPY);
+          newNode = new TreeNode(val);
+          newNode.position = [this.startPX, this.startPY];
           this.root = newNode;
         } else {
           let parent = arg;
-          newNode = new TreeNode(this.ctx, val);
+          newNode = new TreeNode(val);
           newNode.parent = parent;
           console.log(level);
 
           let cos = Math.cos((10 + level * 20) / 180 * Math.PI);
           let sin = Math.sin((10 + level * 20) / 180 * Math.PI);
           console.log(cos, sin);
-          
+          const [parentPX, parentPY] = parent.position;
+          let childPX, childPY;
           if (parent.val > val) {
             parent.left = newNode;
-            newNode.pX = parent.pX - cos * 160;
-            newNode.pY = parent.pY + sin * 120;
-            drawLineBetweenNodes(arg, newNode, this.ctx);
+            childPX = parentPX - cos * 160;
+            childPY = parentPY + sin * 120;
           } else {
             parent.right = newNode;
-            newNode.pX = parent.pX + cos * 160;
-            newNode.pY = parent.pY + sin * 120;
-            drawLineBetweenNodes(arg, newNode, this.ctx);
+            childPX = parentPX + cos * 160;
+            childPY = parentPY + sin * 120;
           }
+          newNode.position = [childPX, childPY];
+          drawLineBetweenNodes(arg, newNode, this.layer);
         }
-        newNode.drawNode();
+        console.log(newNode);
+        
+        newNode.drawNode(this.layer);
         return {
           node: newNode,
           flag: ReturnFlag.NEXT_LOOP
@@ -64,8 +69,6 @@ class RedBlackTree {
           flag: ReturnFlag.FINISH
         }
       }
-    }, (node) => {
-
     }], this.root);
     // let t = this.root;
     // let p = null;
