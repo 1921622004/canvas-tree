@@ -11,7 +11,8 @@ class TreeNode {
   private _val: number;
   public readonly ele: Arc;
   constructor(
-    val: number
+    val: number,
+    public level: number
   ) {
     this._val = val;
     this.ele = new Arc({
@@ -56,6 +57,10 @@ class TreeNode {
 
   public get val(): number {
     return this._val
+  }
+
+  public translatePosition(pos: [number, number]) {
+    this.ele.transition(0.1).attr({ pos });
   }
 
   public drawNode(layer: Layer) {

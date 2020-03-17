@@ -24,8 +24,8 @@ export const performWorkAtNode = (node: TreeNode, works: Work[], arg: any) => {
     index = i;
     let curWork = works[i];
     if (!curWork) return;
-    setTimeout(() => {
-      let { node: returnNode, flag, res } = curWork(node, arg);
+    timer = setTimeout(async () => {
+      let { node: returnNode, flag, res } = await curWork(node, arg);
       arg = res;
       node = returnNode;
       if (flag === ReturnFlag.CONTINUE_LOOP) {
@@ -33,6 +33,8 @@ export const performWorkAtNode = (node: TreeNode, works: Work[], arg: any) => {
       } else if (flag === ReturnFlag.NEXT_LOOP) {
         next(i + 1);
       } else {
+        timer = null;
+        clearTimeout(timer);
         return
       }
     }, 300);

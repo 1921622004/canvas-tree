@@ -1,6 +1,6 @@
 import TreeNode from "./treeNode"
 import { performWorkAtNode, ReturnFlag, drawLineBetweenNodes } from "./utils";
-import { Scene, Layer } from "spritejs";
+import { Scene, Layer, Polyline } from "spritejs";
 
 class RedBlackTree {
   private root: TreeNode = null;
@@ -10,39 +10,27 @@ class RedBlackTree {
   }
 
   add = (val: number): void => {
-    let level = 0;
     performWorkAtNode(this.root, [(node, arg: TreeNode) => {
       if (!node) {
         let newNode: TreeNode;
         if (!arg) {
-          newNode = new TreeNode(val);
+          newNode = new TreeNode(val, 1);
           newNode.position = [this.startPX, this.startPY];
           this.root = newNode;
         } else {
           let parent = arg;
-          newNode = new TreeNode(val);
+          newNode = new TreeNode(val, parent.level + 1);
           newNode.parent = parent;
-          console.log(level);
 
-          let cos = Math.cos((10 + level * 20) / 180 * Math.PI);
-          let sin = Math.sin((10 + level * 20) / 180 * Math.PI);
-          console.log(cos, sin);
-          const [parentPX, parentPY] = parent.position;
-          let childPX, childPY;
           if (parent.val > val) {
             parent.left = newNode;
-            childPX = parentPX - cos * 160;
-            childPY = parentPY + sin * 120;
+            newNode.position = this.getChildPosByParent(parent, 'left')
           } else {
             parent.right = newNode;
-            childPX = parentPX + cos * 160;
-            childPY = parentPY + sin * 120;
+            newNode.position = this.getChildPosByParent(parent, 'right');
           }
-          newNode.position = [childPX, childPY];
           drawLineBetweenNodes(arg, newNode, this.layer);
         }
-        console.log(newNode);
-        
         newNode.drawNode(this.layer);
         return {
           node: newNode,
@@ -50,14 +38,12 @@ class RedBlackTree {
         }
       };
       if (node.val > val) {
-        level++;
         return {
           node: node.left,
           flag: ReturnFlag.CONTINUE_LOOP,
           res: node
         }
       } else if (node.val < val) {
-        level++;
         return {
           node: node.right,
           flag: ReturnFlag.CONTINUE_LOOP,
@@ -69,26 +55,13 @@ class RedBlackTree {
           flag: ReturnFlag.FINISH
         }
       }
+    }, (node) => {
+      console.log(node);
+      return {
+        node: node,
+        flag: ReturnFlag.FINISH
+      }
     }], this.root);
-    // let t = this.root;
-    // let p = null;
-    // while (t) {
-    //   p = t;
-    //   if (t.val < val) {
-    //     t = t.right;
-    //   } else if (t.val > val) {
-    //     t = t.left;
-    //   } else return;
-    // }
-    // let node = new TreeNode(this.ctx, val);
-    // node.parent = p;
-    // if (p === null) {
-    //   this.root = node;
-    // } else if (p.val < node.val) {
-    //   p.right = node;
-    // } else {
-    //   p.left = node;
-    // }
   }
 
   find = (val: number): boolean => {
@@ -97,6 +70,79 @@ class RedBlackTree {
 
   remove = (val: number): void => {
 
+  }
+
+  getChildPosByParent = (parent: TreeNode, dir: 'left' | 'right'): [number, number] => {
+    let level = parent.level;
+    let cos = Math.cos((10 + level * 20) / 180 * Math.PI);
+    let sin = Math.sin((10 + level * 20) / 180 * Math.PI);
+    const [parentPX, parentPY] = parent.position;
+    if (dir === 'left') {
+      return [parentPX - cos * 160, parentPY + sin * 120];
+    } else {
+      return [parentPX + cos * 120, parentPY + sin * 120];
+    }
+  }
+
+  rotateLeft = (node: TreeNode): TreeNode => {
+    let eles = this.getAllEleByDir(node, 'left');
+    let leftChildPos = this.getChildPosByParent(node, 'left');
+    let diffX = node.position[0] - leftChildPos[0];
+    let diffY = node.position[1] - leftChildPos[1];
+    eles.forEach((item) => {
+      if (item instanceof TreeNode) {
+        let { position } = item;
+        item.translatePosition([position[0] - diffX, position[1] - diffY])
+      }
+      if (item instanceof Polyline) {
+        let points = item.getAttribute('points');
+        item.transition(0.1).attr({
+          points: [points[0] - diffX, points[1] - diffY, points[2] - diffX, points[3] - diffY]
+        })
+      }
+    })
+    let rightNode = node.right;
+    let rightNodeLeft = rightNode.left;
+    node.right = rightNodeLeft;
+    if (rightNodeLeft) rightNodeLeft.parent = node;
+    rightNode.left = node;
+    if (node.parent) {
+      if (node.parent.left === node) {
+        node.parent.left = rightNode;
+      } else {
+        node.parent.right = rightNode;
+      }
+      rightNode.parent = node.parent;
+    } else {
+      this.root = rightNode;
+      rightNode.parent = null;
+    }
+    node.parent = rightNode;
+    return rightNode
+  }
+
+  getAllEleByDir = (node: TreeNode, dir: 'left' | 'right'): (TreeNode | Polyline)[] => {
+    let eles: any[] = [node];
+    const mapper = (node: TreeNode) => {
+      eles.push(node);
+      if (!node.left && !node.right) return
+      if (node.left) {
+        eles.push(node.leftLine);
+        mapper(node.left)
+      }
+      if (node.right) {
+        eles.push(node.rightLine);
+        mapper(node.right);
+      }
+    }
+    if (dir === 'left') {
+      eles.push(node.leftLine);
+      mapper(node.left);
+    } else {
+      eles.push(node.rightLine);
+      mapper(node.right);
+    }
+    return eles
   }
 }
 

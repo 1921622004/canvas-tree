@@ -1,4 +1,4 @@
-import { Scene } from "spritejs";
+import { Scene, Polyline } from "spritejs";
 import RedBlackTree from "./tree";
 
 
@@ -11,9 +11,15 @@ const scene = new Scene({
 });
 console.log(scene);
 
-let rbTree = new RedBlackTree(scene.layer());
+let layer = scene.layer();
+let rbTree = new RedBlackTree(layer);
+// rbTree.add(12);
+// rbTree.add(7);
+// rbTree.add(19);
+// rbTree.add(13);
+// rbTree.add(23);
 
-(function () {
+;(function () {
   let addInput: HTMLInputElement = document.querySelector('#add-input');
   let addBtn = document.querySelector('#add-btn');
   let removeInput: HTMLInputElement = document.querySelector('#remove-input');
