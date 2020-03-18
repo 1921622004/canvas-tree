@@ -85,6 +85,8 @@ class RedBlackTree {
   }
 
   rotateLeft = (node: TreeNode): TreeNode => {
+    let rightNode = node.right;
+    let rightNodeLeft = rightNode.left;
     let eles = this.getAllEleByDir(node, 'left');
     let leftChildPos = this.getChildPosByParent(node, 'left');
     let diffX = node.position[0] - leftChildPos[0];
@@ -92,6 +94,41 @@ class RedBlackTree {
     eles.forEach((item) => {
       if (item instanceof TreeNode) {
         let { position } = item;
+        item.level--;
+        item.translatePosition([position[0] + diffX, position[1] + diffY])
+      }
+      if (item instanceof Polyline) {
+        let points = item.getAttribute('points');
+        item.transition(0.1).attr({
+          points: [points[0] + diffX, points[1] + diffY, points[2] + diffX, points[3] + diffY]
+        })
+      }
+    });
+    node.rightLine.remove();
+    if (rightNodeLeft) {
+      let rightNodeLeftEles = this.getAllEleByDir(rightNodeLeft, 'all');
+      let rightNodeLeftNewPos = this.getChildPosByParent(node, 'right');
+      let rnlDiffX = rightNodeLeft.position[0] - rightNodeLeftNewPos[0];
+      let rnlDiffY = rightNodeLeft.position[1] - rightNodeLeftNewPos[1];
+      rightNodeLeftEles.forEach((item) => {
+        if (item instanceof TreeNode) {
+          let { position } = item;
+          item.translatePosition([position[0] - rnlDiffX, position[1] - rnlDiffY]);
+        }
+        if (item instanceof Polyline) {
+          let points = item.getAttribute('points');
+          item.transition(0.1).attr({
+            points: [points[0] - rnlDiffX, points[1] - rnlDiffY, points[2] - rnlDiffX, points[3] - rnlDiffY]
+          })
+        }
+      });
+      drawLineBetweenNodes(node, rightNodeLeft, this.layer);
+    }
+    let rightNodeEles = this.getAllEleByDir(rightNode, 'all');
+    rightNodeEles.forEach((item) => {
+      if (item instanceof TreeNode) {
+        let { position } = item;
+        item.level++;
         item.translatePosition([position[0] - diffX, position[1] - diffY])
       }
       if (item instanceof Polyline) {
@@ -100,9 +137,9 @@ class RedBlackTree {
           points: [points[0] - diffX, points[1] - diffY, points[2] - diffX, points[3] - diffY]
         })
       }
-    })
-    let rightNode = node.right;
-    let rightNodeLeft = rightNode.left;
+    });
+    drawLineBetweenNodes(rightNode, node, this.layer);
+    rightNode.leftLine.remove();
     node.right = rightNodeLeft;
     if (rightNodeLeft) rightNodeLeft.parent = node;
     rightNode.left = node;
@@ -121,8 +158,9 @@ class RedBlackTree {
     return rightNode
   }
 
-  getAllEleByDir = (node: TreeNode, dir: 'left' | 'right'): (TreeNode | Polyline)[] => {
-    let eles: any[] = [node];
+  getAllEleByDir = (node: TreeNode, dir: 'left' | 'right' | 'all'): (TreeNode | Polyline)[] => {
+    let eles: any[] = [];
+    node && eles.push(node);
     const mapper = (node: TreeNode) => {
       eles.push(node);
       if (!node.left && !node.right) return
@@ -135,12 +173,21 @@ class RedBlackTree {
         mapper(node.right);
       }
     }
-    if (dir === 'left') {
+    if (dir === 'left' && node.left) {
       eles.push(node.leftLine);
       mapper(node.left);
-    } else {
+    } else if (dir === 'right' && node.right) {
       eles.push(node.rightLine);
       mapper(node.right);
+    } else {
+      if (node.left) {
+        eles.push(node.leftLine);
+        mapper(node.left);
+      }
+      if (node.right) {
+        eles.push(node.rightLine);
+        mapper(node.right);
+      }
     }
     return eles
   }
