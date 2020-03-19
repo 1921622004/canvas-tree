@@ -134,63 +134,19 @@ class RedBlackTree {
   rotateLeft = (node: TreeNode): TreeNode => {
     let rightNode = node.right;
     let rightNodeLeft = rightNode.left;
-    let eles = this.getAllEleByDir(node, 'left');
-    let leftChildPos = this.getChildPosByParent(node, 'left');
-    let diffX = node.position[0] - leftChildPos[0];
-    let diffY = node.position[1] - leftChildPos[1];
-    
-    eles.forEach((item) => {
-      if (item instanceof TreeNode) {
-        let { position } = item;
-        item.level--;
-        item.translatePosition([position[0] + diffX, position[1] + diffY])
-      }
-      if (item instanceof Polyline) {
-        let points = item.getAttribute('points');
-        item.transition(0.1).attr({
-          points: [points[0] + diffX, points[1] + diffY, points[2] + diffX, points[3] + diffY]
-        })
-      }
-    });
+    let oldNodePostion = node.position;
     node.rightLine.remove();
-    if (rightNodeLeft) {
-      let rightNodeLeftEles = this.getAllEleByDir(rightNodeLeft, 'all');
-      let rightNodeLeftNewPos = this.getChildPosByParent(node, 'right');
-      let rnlDiffX = rightNodeLeft.position[0] - rightNodeLeftNewPos[0];
-      let rnlDiffY = rightNodeLeft.position[1] - rightNodeLeftNewPos[1];
-      rightNodeLeftEles.forEach((item) => {
-        if (item instanceof TreeNode) {
-          let { position } = item;
-          item.translatePosition([position[0] - rnlDiffX, position[1] - rnlDiffY]);
-        }
-        if (item instanceof Polyline) {
-          let points = item.getAttribute('points');
-          item.transition(0.1).attr({
-            points: [points[0] - rnlDiffX, points[1] - rnlDiffY, points[2] - rnlDiffX, points[3] - rnlDiffY]
-          })
-        }
-      });
-      drawLineBetweenNodes(node, rightNodeLeft, this.layer);
-    }
-    let rightNodeEles = this.getAllEleByDir(rightNode, 'all');
-    rightNodeEles.forEach((item) => {
-      if (item instanceof TreeNode) {
-        let { position } = item;
-        item.level++;
-        item.translatePosition([position[0] - diffX, position[1] - diffY])
-      }
-      if (item instanceof Polyline) {
-        let points = item.getAttribute('points');
-        item.transition(0.1).attr({
-          points: [points[0] - diffX, points[1] - diffY, points[2] - diffX, points[3] - diffY]
-        })
-      }
-    });
-    drawLineBetweenNodes(rightNode, node, this.layer);
-    rightNode.leftLine.remove();
     node.right = rightNodeLeft;
-    if (rightNodeLeft) rightNodeLeft.parent = node;
+    let leftChildPos = this.getChildPosByParent(node, 'left');
+    this.moveAllNode(node, leftChildPos, 'down', false);
+    if (rightNodeLeft) {
+      rightNode.left = null;
+      rightNode.leftLine.remove();
+      rightNodeLeft.parent = node;
+    }
+    this.moveAllNode(rightNode, oldNodePostion, 'up', false);
     rightNode.left = node;
+    drawLineBetweenNodes(rightNode, node, this.layer);
     if (node.parent) {
       if (node.parent.left === node) {
         node.parent.left = rightNode;
@@ -209,62 +165,19 @@ class RedBlackTree {
   rotateRight = (node: TreeNode): TreeNode => {
     let leftNode = node.left;
     let leftNodeRight = leftNode.right;
-    let eles = this.getAllEleByDir(node, 'right');
-    let rightChildPos = this.getChildPosByParent(node, 'right');
-    let diffX = node.position[0] - rightChildPos[0]; // fu
-    let diffY = node.position[1] - rightChildPos[1]; // fu
-    eles.forEach((item) => {
-      if (item instanceof TreeNode) {
-        let { position } = item;
-        item.level--;
-        item.translatePosition([position[0] + diffX, position[1] + diffY])
-      }
-      if (item instanceof Polyline) {
-        let points = item.getAttribute('points');
-        item.transition(0.1).attr({
-          points: [points[0] + diffX, points[1] + diffY, points[2] + diffX, points[3] + diffY]
-        })
-      }
-    });
+    let oldNodePostion = node.position;
     node.leftLine.remove();
-    if (leftNodeRight) {
-      let leftNodeRightEles = this.getAllEleByDir(leftNodeRight, 'all');
-      let leftNodeRightNewPos = this.getChildPosByParent(node, 'left');
-      let rnlDiffX = leftNodeRight.position[0] - leftNodeRightNewPos[0];
-      let rnlDiffY = leftNodeRight.position[1] - leftNodeRightNewPos[1];
-      leftNodeRightEles.forEach((item) => {
-        if (item instanceof TreeNode) {
-          let { position } = item;
-          item.translatePosition([position[0] - rnlDiffX, position[1] - rnlDiffY]);
-        }
-        if (item instanceof Polyline) {
-          let points = item.getAttribute('points');
-          item.transition(0.1).attr({
-            points: [points[0] - rnlDiffX, points[1] - rnlDiffY, points[2] - rnlDiffX, points[3] - rnlDiffY]
-          })
-        }
-      });
-      drawLineBetweenNodes(node, leftNodeRight, this.layer);
-    }
-    let rightNodeEles = this.getAllEleByDir(leftNode, 'all');
-    rightNodeEles.forEach((item) => {
-      if (item instanceof TreeNode) {
-        let { position } = item;
-        item.level++;
-        item.translatePosition([position[0] - diffX, position[1] - diffY])
-      }
-      if (item instanceof Polyline) {
-        let points = item.getAttribute('points');
-        item.transition(0.1).attr({
-          points: [points[0] - diffX, points[1] - diffY, points[2] - diffX, points[3] - diffY]
-        })
-      }
-    });
-    drawLineBetweenNodes(leftNode, node, this.layer);
-    leftNode.rightLine.remove();
     node.left = leftNodeRight;
-    if (leftNodeRight) leftNodeRight.parent = node;
+    let rightNodePos = this.getChildPosByParent(node, 'right');
+    this.moveAllNode(node, rightNodePos, 'down', false);
+    if (leftNodeRight) {
+      leftNode.right = null;
+      leftNode.leftLine.remove();
+      leftNodeRight.parent = node;
+    }
+    this.moveAllNode(leftNode, oldNodePostion, 'up', false);
     leftNode.right = node;
+    drawLineBetweenNodes(leftNode, node, this.layer);
     if (node.parent) {
       if (node.parent.left === node) {
         node.parent.left = leftNode;
@@ -312,6 +225,19 @@ class RedBlackTree {
       }
     }
     return eles
+  }
+
+  moveAllNode = (node: TreeNode, pos: [number, number], dir: 'up' | 'down', needDrawLine: boolean) => {
+    if (!node) return;
+    if (dir === 'up') {
+      node.level--;
+    } else {
+      node.level++;
+    }
+    node.position = pos;
+    needDrawLine && drawLineBetweenNodes(node.parent, node, this.layer);
+    node.left && this.moveAllNode(node.left, this.getChildPosByParent(node, 'left'), dir, true);
+    node.right && this.moveAllNode(node.right, this.getChildPosByParent(node, 'right'), dir, true);
   }
 }
 

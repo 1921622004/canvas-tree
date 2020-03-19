@@ -83,6 +83,12 @@ export function drawLineBetweenNodes(parent: TreeNode, child: TreeNode, layer: L
     smooth: false,
     strokeColor: '#000'
   });
-  isLeftChild ? parent.leftLine = line : parent.rightLine = line;
+  if (isLeftChild) {
+    parent.leftLine && parent.leftLine.remove();
+    parent.leftLine = line;
+  } else {
+    parent.rightLine && parent.rightLine.remove();
+    parent.rightLine = line;
+  }
   layer.append(line);
 }
