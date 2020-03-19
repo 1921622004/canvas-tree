@@ -30,11 +30,13 @@ let rbTree = new RedBlackTree(layer);
     let num = parseInt(inputVal);
     if (isNaN(num)) return;
     rbTree.add(num);
+    addInput.value = '';
   })
   removeBtn.addEventListener('click', () => {
     let removeVal = removeInput.value;
     if (!removeVal || !removeVal.trim()) return;
     let num = parseInt(removeVal);
     if (isNaN(num)) return;
+    removeInput.value = '';
   })
 })()

@@ -63,7 +63,34 @@ class RedBlackTree {
   }
 
   remove = (val: number): void => {
+    performWorkAtNode(this.root, [(node, arg) => {
+      if (!node) {
+        return {
+          node: this.root,
+          flag: ReturnFlag.FINISH
+        }
+      } else {
+        if (node.val > val) {
+          return {
+            node: node.left,
+            flag: ReturnFlag.CONTINUE_LOOP
+          }
+        } else if (node.val < val) {
+          return {
+            node: node.right,
+            flag: ReturnFlag.CONTINUE_LOOP
+          }
+        } else {
+          return {
+            node,
+            flag: ReturnFlag.NEXT_LOOP,
+            res: val
+          }
+        }
+      }
+    }, async (node, arg) => {
 
+    }], this.root);
   }
 
   insertFixWorkLoop = (node: TreeNode) => {
@@ -238,6 +265,68 @@ class RedBlackTree {
     needDrawLine && drawLineBetweenNodes(node.parent, node, this.layer);
     node.left && this.moveAllNode(node.left, this.getChildPosByParent(node, 'left'), dir, true);
     node.right && this.moveAllNode(node.right, this.getChildPosByParent(node, 'right'), dir, true);
+  }
+
+  removeNode = (node: TreeNode) => {
+    if (node === this.root) {
+      if (node.left) {
+        this.root = node.left;
+        this.moveAllNode(this.root, [this.startPX, this.startPY], 'up', false);
+        node.parent = null;
+      } else if (node.right) {
+        this.root = node.right;
+        this.moveAllNode(this.root, [this.startPX, this.startPY], 'up', false);
+        node.parent = null;
+      } else {
+        this.root = null;
+      }
+    } else {
+      let nodePos = node.position;
+      if (node.parent.left === node) {
+        if (node.left) {
+          node.parent.left = node.left;
+          node.left.parent = node.parent;
+          this.moveAllNode(node.left, nodePos, 'up', false);
+        } else if (node.right) {
+          node.parent.left = node.right;
+          node.right.parent = node.parent;
+          this.moveAllNode(node.right, nodePos, 'up', false);
+        } else {
+          node.parent.left = null
+        }
+      } else {
+        if (node.left) {
+          node.parent.right = node.left;
+          node.left.parent = node.parent;
+          this.moveAllNode(node.left, nodePos, 'up', false);
+        } else if (node.right) {
+          node.parent.right = node.right;
+          node.right.parent = node.parent
+          this.moveAllNode(node.right, nodePos, 'up', false);
+        } else {
+          node.parent.right = null
+        }
+      }
+    }
+  }
+
+  findMin = async (_node: TreeNode): Promise<TreeNode> => {
+    let res;
+    await performWorkAtNode(_node, [(node) => {
+      if (node.left) {
+        return {
+          node: node.left,
+          flag: ReturnFlag.CONTINUE_LOOP
+        }
+      } else {
+        res = node;
+        return {
+          node,
+          flag: ReturnFlag.FINISH
+        }
+      }
+    }], null);
+    return res;
   }
 }
 

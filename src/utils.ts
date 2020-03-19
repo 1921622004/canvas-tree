@@ -18,28 +18,29 @@ let timer: number;
 type Work = (node: TreeNode, arg: any) => workRes;
 
 export const performWorkAtNode = (node: TreeNode, works: Work[], arg: any) => {
-  if (timer) return;
-  let index = -1;
-  function next(i: number) {
-    index = i;
-    let curWork = works[i];
-    if (!curWork) return;
-    timer = setTimeout(async () => {
-      let { node: returnNode, flag, res } = await curWork(node, arg);
-      arg = res;
-      node = returnNode;
-      if (flag === ReturnFlag.CONTINUE_LOOP) {
-        next(i);
-      } else if (flag === ReturnFlag.NEXT_LOOP) {
-        next(i + 1);
-      } else {
-        timer = null;
-        clearTimeout(timer);
-        return
-      }
-    }, 300);
-  }
-  next(0);
+  return new Promise((resolve, reject) => {
+    let index = -1;
+    function next(i: number) {
+      index = i;
+      let curWork = works[i];
+      if (!curWork) return;
+      setTimeout(async () => {
+        let { node: returnNode, flag, res } = await curWork(node, arg);
+        arg = res;
+        node = returnNode;
+        if (flag === ReturnFlag.CONTINUE_LOOP) {
+          next(i);
+        } else if (flag === ReturnFlag.NEXT_LOOP) {
+          next(i + 1);
+        } else {
+          timer = null;
+          resolve(returnNode);
+          return
+        }
+      }, 300);
+    }
+    next(0);
+  })
 }
 
 export function clearArcFun(x: number, y: number, r: number, cxt: CanvasRenderingContext2D) {
@@ -64,8 +65,6 @@ export function clearArcFun(x: number, y: number, r: number, cxt: CanvasRenderin
 export function drawLineBetweenNodes(parent: TreeNode, child: TreeNode, layer: Layer) {
   let [parentX, parentY] = parent.position;
   let [childX, childY] = child.position;
-  console.log(parent.position, child.position);
-
   let isLeftChild = parent.val > child.val;
   let a = Math.abs(parentX - childX);
   let b = Math.abs(parentY - childY);
