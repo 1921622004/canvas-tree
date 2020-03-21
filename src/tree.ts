@@ -55,7 +55,7 @@ class RedBlackTree {
           flag: ReturnFlag.FINISH
         }
       }
-    }, this.insertFixWorkLoop], this.root);
+    }, this.insertFixWorkLoop], this.root, this.layer);
   }
 
   find = (val: number): boolean => {
@@ -65,6 +65,9 @@ class RedBlackTree {
   remove = (val: number): void => {
     let nodeRef: TreeNode;
     performWorkAtNode(this.root, [async (node, target) => {
+      console.log(target);
+      console.log('node:', node);
+      
       if (!node) {
         return {
           node: this.root,
@@ -74,11 +77,13 @@ class RedBlackTree {
         if (node.val > target) {
           return {
             node: node.left,
+            res: target,
             flag: ReturnFlag.CONTINUE_LOOP
           }
         } else if (node.val < target) {
           return {
             node: node.right,
+            res: target,
             flag: ReturnFlag.CONTINUE_LOOP
           }
         } else {
@@ -229,7 +234,7 @@ class RedBlackTree {
         node: this.root,
         flag: ReturnFlag.FINISH
       }
-    }], val);
+    }], val, this.layer);
   }
 
   insertFixWorkLoop = (node: TreeNode) => {
@@ -291,9 +296,9 @@ class RedBlackTree {
     let sin = Math.sin((10 + level * 20) / 180 * Math.PI);
     const [parentPX, parentPY] = parent.position;
     if (dir === 'left') {
-      return [parentPX - cos * 160, parentPY + sin * 120];
+      return [parentPX - (200 - level * 30), parentPY + 80];
     } else {
-      return [parentPX + cos * 120, parentPY + sin * 120];
+      return [parentPX + (200 - level * 30), parentPY + 80];
     }
   }
 
@@ -309,6 +314,7 @@ class RedBlackTree {
       rightNode.left = null;
       rightNode.leftLine.remove();
       rightNodeLeft.parent = node;
+      drawLineBetweenNodes(node, rightNodeLeft, this.layer);
     }
     this.moveAllNode(rightNode, oldNodePostion, 'up', false);
     rightNode.left = node;
@@ -340,6 +346,7 @@ class RedBlackTree {
       leftNode.right = null;
       leftNode.leftLine.remove();
       leftNodeRight.parent = node;
+      drawLineBetweenNodes(node, leftNodeRight, this.layer);
     }
     this.moveAllNode(leftNode, oldNodePostion, 'up', false);
     leftNode.right = node;
@@ -422,7 +429,6 @@ class RedBlackTree {
     } else {
       let nodePos = node.position;
       if (node.parent.left === node) {
-        node.parent.leftLine.remove();
         if (node.left) {
           node.parent.left = node.left;
           node.left.parent = node.parent;
@@ -432,10 +438,10 @@ class RedBlackTree {
           node.right.parent = node.parent;
           this.moveAllNode(node.right, nodePos, 'up', false);
         } else {
-          node.parent.left = null
+          node.parent.leftLine.remove();
+          node.parent.left = null;
         }
       } else {
-        node.parent.rightLine.remove();
         if (node.left) {
           node.parent.right = node.left;
           node.left.parent = node.parent;
@@ -445,7 +451,8 @@ class RedBlackTree {
           node.right.parent = node.parent
           this.moveAllNode(node.right, nodePos, 'up', false);
         } else {
-          node.parent.right = null
+          node.parent.rightLine.remove();
+          node.parent.right = null;
         }
       }
     }
@@ -467,7 +474,7 @@ class RedBlackTree {
           flag: ReturnFlag.FINISH
         }
       }
-    }], null);
+    }], null, this.layer);
     return res;
   }
 }

@@ -18,7 +18,14 @@ let timer: number;
 
 type Work = (node: TreeNode, arg: any) => Promise<workRes>;
 
-export const performWorkAtNode = (node: TreeNode, works: Work[], arg: any) => {
+export const performWorkAtNode = (node: TreeNode, works: Work[], arg: any, layer: Layer) => {
+  let arrow = new Polyline({
+    pos: [0, 0],
+    points: [0, 0, 0, 6, 30, 6, 30, 10, 37, 2, 30, -6, 30, 0],
+    fillColor: '#09f',
+    close: true,
+    
+  });
   return new Promise((resolve, reject) => {
     let index = -1;
     function next(i: number) {
@@ -27,6 +34,13 @@ export const performWorkAtNode = (node: TreeNode, works: Work[], arg: any) => {
       if (!curWork) return;
       setTimeout(async () => {
         let { node: returnNode, flag, res } = await curWork(node, arg);
+        if (node) {
+          let pos = node.position;
+          layer.append(arrow);
+          arrow.attr({
+            pos: [pos[0] - 65, pos[1]]
+          });
+        }
         arg = res;
         node = returnNode;
         if (flag === ReturnFlag.CONTINUE_LOOP) {
@@ -38,9 +52,10 @@ export const performWorkAtNode = (node: TreeNode, works: Work[], arg: any) => {
         } else {
           timer = null;
           resolve(returnNode);
+          arrow.remove();
           return
         }
-      }, 300);
+      }, 1000);
     }
     next(0);
   })
@@ -73,13 +88,9 @@ export function drawLineBetweenNodes(parent: TreeNode, child: TreeNode, layer: L
   let b = Math.abs(parentY - childY);
   let c = Math.sqrt(a * a + b * b);
   let startX = isLeftChild ? parentX - a / c * 25 : parentX + a / c * 25;
-  console.log('startX: ', startX);
   let startY = parentY + b / c * 25;
-  console.log('startY: ', startY);
   let endX = isLeftChild ? childX + a / c * 25 : childX - a / c * 25;
-  console.log('endX: ', endX);
   let endY = childY - b / c * 25;
-  console.log('endY: ', endY);
   let line = new Polyline({
     points: [startX, startY, endX, endY],
     smooth: false,
