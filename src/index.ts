@@ -24,20 +24,32 @@ let rbTree = new RedBlackTree(layer);
   let addBtn = document.querySelector('#add-btn');
   let removeInput: HTMLInputElement = document.querySelector('#remove-input');
   let removeBtn = document.querySelector('#remove-btn');
-  addBtn.addEventListener('click', () => {
+  let addHandler = () => {
     let inputVal = addInput.value;
     if (!inputVal || !inputVal.trim()) return;
     let num = parseInt(inputVal);
     if (isNaN(num)) return;
     rbTree.add(num);
     addInput.value = '';
+  }
+  addBtn.addEventListener('click', addHandler);
+  addInput.addEventListener('keydown', (ev) => {
+    if (ev.keyCode === 13) {
+      addHandler();
+    }
   })
-  removeBtn.addEventListener('click', () => {
+  let removeHandler = () => {
     let removeVal = removeInput.value;
     if (!removeVal || !removeVal.trim()) return;
     let num = parseInt(removeVal);
     if (isNaN(num)) return;
     rbTree.remove(num);
     removeInput.value = '';
+  }
+  removeBtn.addEventListener('click', removeHandler);
+  removeInput.addEventListener('keydown', (ev) => {
+    if (ev.keyCode === 13) {
+      removeHandler();
+    }
   })
 })()
