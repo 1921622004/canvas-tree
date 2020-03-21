@@ -67,7 +67,7 @@ class RedBlackTree {
     performWorkAtNode(this.root, [async (node, target) => {
       console.log(target);
       console.log('node:', node);
-      
+
       if (!node) {
         return {
           node: this.root,
@@ -160,7 +160,11 @@ class RedBlackTree {
                 flag: ReturnFlag.CONTINUE_LOOP
               }
             }
-          } else if (brotherNode.left.color === TreeNodeColor.Red && brotherNode.right.color === TreeNodeColor.Black) {
+          } else if (
+            (brotherNode.left && brotherNode.left.color === TreeNodeColor.Red)
+            &&
+            (!brotherNode.right || brotherNode.right.color === TreeNodeColor.Black)
+          ) {
             this.rotateRight(brotherNode);
             brotherNode.color = TreeNodeColor.Red;
             brotherNode.parent.color = TreeNodeColor.Black;
@@ -207,7 +211,11 @@ class RedBlackTree {
                 flag: ReturnFlag.CONTINUE_LOOP
               }
             }
-          } else if (brotherNode.right.color === TreeNodeColor.Red && brotherNode.left.color === TreeNodeColor.Black) {
+          } else if (
+            (brotherNode.right && brotherNode.right.color === TreeNodeColor.Red) 
+            && 
+            (!brotherNode.leftLine || brotherNode.left.color === TreeNodeColor.Black)
+          ) {
             this.rotateLeft(brotherNode);
             brotherNode.color = TreeNodeColor.Red;
             brotherNode.parent.color = TreeNodeColor.Black;

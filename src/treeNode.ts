@@ -69,6 +69,7 @@ class TreeNode {
 
   public delete() {
     this.ele.remove();
+    this.textEle.remove();
   }
 }
 
