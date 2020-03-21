@@ -422,6 +422,7 @@ class RedBlackTree {
     } else {
       let nodePos = node.position;
       if (node.parent.left === node) {
+        node.parent.leftLine.remove();
         if (node.left) {
           node.parent.left = node.left;
           node.left.parent = node.parent;
@@ -434,6 +435,7 @@ class RedBlackTree {
           node.parent.left = null
         }
       } else {
+        node.parent.rightLine.remove();
         if (node.left) {
           node.parent.right = node.left;
           node.left.parent = node.parent;
@@ -447,11 +449,12 @@ class RedBlackTree {
         }
       }
     }
+    node.delete();
   }
 
   findMin = async (_node: TreeNode): Promise<TreeNode> => {
     let res;
-    await performWorkAtNode(_node, [(node) => {
+    await performWorkAtNode(_node, [async (node) => {
       if (node.left) {
         return {
           node: node.left,

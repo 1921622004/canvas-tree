@@ -37,6 +37,7 @@ let rbTree = new RedBlackTree(layer);
     if (!removeVal || !removeVal.trim()) return;
     let num = parseInt(removeVal);
     if (isNaN(num)) return;
+    rbTree.remove(num);
     removeInput.value = '';
   })
 })()

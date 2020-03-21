@@ -66,6 +66,10 @@ class TreeNode {
   public drawNode(layer: Layer) {
     layer.append(this.ele, this.textEle);
   }
+
+  public delete() {
+    this.ele.remove();
+  }
 }
 
 export default TreeNode
