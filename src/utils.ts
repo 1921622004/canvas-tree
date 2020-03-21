@@ -4,7 +4,8 @@ import { Scene, Polyline, Layer } from "spritejs";
 export enum ReturnFlag {
   CONTINUE_LOOP = 1,
   NEXT_LOOP = 2,
-  FINISH = 3
+  FINISH = 3,
+  PREV_LOOP = 4
 }
 
 interface workRes {
@@ -15,7 +16,7 @@ interface workRes {
 
 let timer: number;
 
-type Work = (node: TreeNode, arg: any) => workRes;
+type Work = (node: TreeNode, arg: any) => Promise<workRes>;
 
 export const performWorkAtNode = (node: TreeNode, works: Work[], arg: any) => {
   return new Promise((resolve, reject) => {
@@ -32,6 +33,8 @@ export const performWorkAtNode = (node: TreeNode, works: Work[], arg: any) => {
           next(i);
         } else if (flag === ReturnFlag.NEXT_LOOP) {
           next(i + 1);
+        } else if (flag === ReturnFlag.PREV_LOOP) {
+          next(i - 1);
         } else {
           timer = null;
           resolve(returnNode);

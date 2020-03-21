@@ -63,19 +63,20 @@ class RedBlackTree {
   }
 
   remove = (val: number): void => {
-    performWorkAtNode(this.root, [(node, arg) => {
+    let nodeRef: TreeNode;
+    performWorkAtNode(this.root, [async (node, target) => {
       if (!node) {
         return {
           node: this.root,
           flag: ReturnFlag.FINISH
         }
       } else {
-        if (node.val > val) {
+        if (node.val > target) {
           return {
             node: node.left,
             flag: ReturnFlag.CONTINUE_LOOP
           }
-        } else if (node.val < val) {
+        } else if (node.val < target) {
           return {
             node: node.right,
             flag: ReturnFlag.CONTINUE_LOOP
@@ -84,13 +85,151 @@ class RedBlackTree {
           return {
             node,
             flag: ReturnFlag.NEXT_LOOP,
-            res: val
+            res: target
           }
         }
       }
+    }, async (node, target) => {
+      if (!node.left || !node.right) {
+        return {
+          flag: ReturnFlag.NEXT_LOOP,
+          node
+        }
+      } else {
+        const minNode = await this.findMin(node.right);
+        node.val = minNode.val;
+        return {
+          flag: ReturnFlag.PREV_LOOP,
+          node: node.right,
+          res: minNode.val
+        }
+      }
     }, async (node, arg) => {
-
-    }], this.root);
+      if (node.color === TreeNodeColor.Red) {
+        this.removeNode(node);
+        return {
+          node: this.root,
+          flag: ReturnFlag.FINISH
+        }
+      } else {
+        return {
+          node,
+          flag: ReturnFlag.NEXT_LOOP
+        }
+      }
+    }, async (node, arg) => {
+      !nodeRef && (nodeRef = node);
+      if (node === this.root || node.color === TreeNodeColor.Red) {
+        return {
+          node,
+          flag: ReturnFlag.NEXT_LOOP
+        }
+      } else {
+        if (node.parent.left === node) {
+          let brotherNode = node.parent.right;
+          if (brotherNode.color === TreeNodeColor.Red) {
+            brotherNode.color = TreeNodeColor.Black;
+            node.color = TreeNodeColor.Black;
+            node.parent.color = TreeNodeColor.Red;
+            this.rotateLeft(node.parent);
+            return {
+              node,
+              flag: ReturnFlag.NEXT_LOOP
+            }
+          } else if (
+            (!brotherNode.left || brotherNode.left.color === TreeNodeColor.Black)
+            &&
+            (!brotherNode.right || brotherNode.right.color === TreeNodeColor.Black)
+          ) {
+            if (node.parent.color === TreeNodeColor.Red) {
+              brotherNode.color = TreeNodeColor.Red;
+              node.parent.color = TreeNodeColor.Black;
+              return {
+                node,
+                flag: ReturnFlag.NEXT_LOOP
+              }
+            } else {
+              brotherNode.color = TreeNodeColor.Red;
+              return {
+                node: node.parent,
+                flag: ReturnFlag.CONTINUE_LOOP
+              }
+            }
+          } else if (brotherNode.left.color === TreeNodeColor.Red && brotherNode.right.color === TreeNodeColor.Black) {
+            this.rotateRight(brotherNode);
+            brotherNode.color = TreeNodeColor.Red;
+            brotherNode.parent.color = TreeNodeColor.Black;
+            return {
+              node,
+              flag: ReturnFlag.CONTINUE_LOOP
+            }
+          } else if (brotherNode.right.color === TreeNodeColor.Red) {
+            brotherNode.color = node.parent.color;
+            node.parent.color = TreeNodeColor.Black;
+            brotherNode.right.color = TreeNodeColor.Black;
+            this.rotateLeft(node.parent);
+            return {
+              node,
+              flag: ReturnFlag.NEXT_LOOP
+            }
+          }
+        } else {
+          let brotherNode = node.parent.left;
+          if (brotherNode.color === TreeNodeColor.Red) {
+            brotherNode.color = TreeNodeColor.Black;
+            node.color = TreeNodeColor.Black;
+            node.parent.color = TreeNodeColor.Red;
+            return {
+              node,
+              flag: ReturnFlag.NEXT_LOOP
+            }
+          } else if (
+            (!brotherNode.left || brotherNode.left.color === TreeNodeColor.Black)
+            &&
+            (!brotherNode.right || brotherNode.right.color === TreeNodeColor.Black)
+          ) {
+            if (node.parent.color === TreeNodeColor.Red) {
+              brotherNode.color = TreeNodeColor.Red;
+              node.parent.color = TreeNodeColor.Black;
+              return {
+                node,
+                flag: ReturnFlag.NEXT_LOOP
+              }
+            } else {
+              brotherNode.color = TreeNodeColor.Red;
+              return {
+                node: node.parent,
+                flag: ReturnFlag.CONTINUE_LOOP
+              }
+            }
+          } else if (brotherNode.right.color === TreeNodeColor.Red && brotherNode.left.color === TreeNodeColor.Black) {
+            this.rotateLeft(brotherNode);
+            brotherNode.color = TreeNodeColor.Red;
+            brotherNode.parent.color = TreeNodeColor.Black;
+            return {
+              node,
+              flag: ReturnFlag.CONTINUE_LOOP
+            }
+          } else if (brotherNode.left.color === TreeNodeColor.Red) {
+            brotherNode.color = node.parent.color;
+            node.parent.color = TreeNodeColor.Black;
+            brotherNode.left.color = TreeNodeColor.Black;
+            this.rotateRight(node.parent);
+            return {
+              node,
+              flag: ReturnFlag.NEXT_LOOP
+            }
+          }
+        }
+      }
+    }, async (node) => {
+      node.color = TreeNodeColor.Black;
+      this.removeNode(nodeRef);
+      return {
+        node: this.root,
+        flag: ReturnFlag.FINISH
+      }
+    }], val);
   }
 
   insertFixWorkLoop = (node: TreeNode) => {
