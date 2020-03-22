@@ -440,10 +440,12 @@ class RedBlackTree {
         if (node.left) {
           node.parent.left = node.left;
           node.left.parent = node.parent;
+          node.leftLine.remove();
           this.moveAllNode(node.left, nodePos, 'up', false);
         } else if (node.right) {
           node.parent.left = node.right;
           node.right.parent = node.parent;
+          node.rightLine.remove();
           this.moveAllNode(node.right, nodePos, 'up', false);
         } else {
           node.parent.leftLine.remove();
@@ -453,10 +455,12 @@ class RedBlackTree {
         if (node.left) {
           node.parent.right = node.left;
           node.left.parent = node.parent;
+          node.leftLine.remove();
           this.moveAllNode(node.left, nodePos, 'up', false);
         } else if (node.right) {
           node.parent.right = node.right;
-          node.right.parent = node.parent
+          node.right.parent = node.parent;
+          node.rightLine.remove();
           this.moveAllNode(node.right, nodePos, 'up', false);
         } else {
           node.parent.rightLine.remove();
