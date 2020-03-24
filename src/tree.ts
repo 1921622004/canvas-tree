@@ -188,6 +188,7 @@ class RedBlackTree {
             brotherNode.color = TreeNodeColor.Black;
             node.color = TreeNodeColor.Black;
             node.parent.color = TreeNodeColor.Red;
+            this.rotateRight(node.parent);
             return {
               node,
               flag: ReturnFlag.NEXT_LOOP
