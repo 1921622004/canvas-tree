@@ -214,7 +214,7 @@ class RedBlackTree {
           } else if (
             (brotherNode.right && brotherNode.right.color === TreeNodeColor.Red) 
             && 
-            (!brotherNode.leftLine || brotherNode.left.color === TreeNodeColor.Black)
+            (!brotherNode.left || brotherNode.left.color === TreeNodeColor.Black)
           ) {
             this.rotateLeft(brotherNode);
             brotherNode.color = TreeNodeColor.Red;
