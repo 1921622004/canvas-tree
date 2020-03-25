@@ -95,7 +95,7 @@ class RedBlackTree {
         }
       }
     }, async (node, target) => {
-      if (!node.left || !node.right) {
+      if (!node.right) {
         return {
           flag: ReturnFlag.NEXT_LOOP,
           node
@@ -149,6 +149,7 @@ class RedBlackTree {
             if (node.parent.color === TreeNodeColor.Red) {
               brotherNode.color = TreeNodeColor.Red;
               node.parent.color = TreeNodeColor.Black;
+              debugger
               return {
                 node,
                 flag: ReturnFlag.NEXT_LOOP
@@ -201,6 +202,7 @@ class RedBlackTree {
             if (node.parent.color === TreeNodeColor.Red) {
               brotherNode.color = TreeNodeColor.Red;
               node.parent.color = TreeNodeColor.Black;
+              debugger
               return {
                 node,
                 flag: ReturnFlag.NEXT_LOOP
