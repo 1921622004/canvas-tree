@@ -139,7 +139,7 @@ class RedBlackTree {
             this.rotateLeft(node.parent);
             return {
               node,
-              flag: ReturnFlag.NEXT_LOOP
+              flag: ReturnFlag.CONTINUE_LOOP
             }
           } else if (
             (!brotherNode.left || brotherNode.left.color === TreeNodeColor.Black)
@@ -192,7 +192,7 @@ class RedBlackTree {
             this.rotateRight(node.parent);
             return {
               node,
-              flag: ReturnFlag.NEXT_LOOP
+              flag: ReturnFlag.CONTINUE_LOOP
             }
           } else if (
             (!brotherNode.left || brotherNode.left.color === TreeNodeColor.Black)
