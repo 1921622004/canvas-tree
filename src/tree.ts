@@ -62,12 +62,9 @@ class RedBlackTree {
     return true
   }
 
-  remove = (val: number): void => {
+  remove = async (val: number) => {
     let nodeRef: TreeNode;
     performWorkAtNode(this.root, [async (node, target) => {
-      console.log(target);
-      console.log('node:', node);
-
       if (!node) {
         return {
           node: this.root,
@@ -136,7 +133,7 @@ class RedBlackTree {
             brotherNode.color = TreeNodeColor.Black;
             node.color = TreeNodeColor.Black;
             node.parent.color = TreeNodeColor.Red;
-            this.rotateLeft(node.parent);
+            await this.rotateLeft(node.parent);
             return {
               node,
               flag: ReturnFlag.CONTINUE_LOOP
@@ -166,7 +163,7 @@ class RedBlackTree {
             &&
             (!brotherNode.right || brotherNode.right.color === TreeNodeColor.Black)
           ) {
-            this.rotateRight(brotherNode);
+            await this.rotateRight(brotherNode);
             brotherNode.color = TreeNodeColor.Red;
             brotherNode.parent.color = TreeNodeColor.Black;
             return {
@@ -177,7 +174,7 @@ class RedBlackTree {
             brotherNode.color = node.parent.color;
             node.parent.color = TreeNodeColor.Black;
             brotherNode.right.color = TreeNodeColor.Black;
-            this.rotateLeft(node.parent);
+            await this.rotateLeft(node.parent);
             return {
               node,
               flag: ReturnFlag.NEXT_LOOP
@@ -189,7 +186,7 @@ class RedBlackTree {
             brotherNode.color = TreeNodeColor.Black;
             node.color = TreeNodeColor.Black;
             node.parent.color = TreeNodeColor.Red;
-            this.rotateRight(node.parent);
+            await this.rotateRight(node.parent);
             return {
               node,
               flag: ReturnFlag.CONTINUE_LOOP
@@ -219,7 +216,7 @@ class RedBlackTree {
             && 
             (!brotherNode.left || brotherNode.left.color === TreeNodeColor.Black)
           ) {
-            this.rotateLeft(brotherNode);
+            await this.rotateLeft(brotherNode);
             brotherNode.color = TreeNodeColor.Red;
             brotherNode.parent.color = TreeNodeColor.Black;
             return {
@@ -230,7 +227,7 @@ class RedBlackTree {
             brotherNode.color = node.parent.color;
             node.parent.color = TreeNodeColor.Black;
             brotherNode.left.color = TreeNodeColor.Black;
-            this.rotateRight(node.parent);
+            await this.rotateRight(node.parent);
             return {
               node,
               flag: ReturnFlag.NEXT_LOOP
@@ -248,7 +245,7 @@ class RedBlackTree {
     }], val, this.layer);
   }
 
-  insertFixWorkLoop = (node: TreeNode) => {
+  insertFixWorkLoop = async (node: TreeNode) => {
     if (node === this.root) {
       node.color = TreeNodeColor.Black
       return {
@@ -271,11 +268,11 @@ class RedBlackTree {
           node = node.parent.parent;
         } else if (node === node.parent.right) {
           node = node.parent;
-          this.rotateLeft(node);
+          await this.rotateLeft(node);
         } else {
           node.parent.color = TreeNodeColor.Black;
           node.parent.parent.color = TreeNodeColor.Red;
-          this.rotateRight(node.parent.parent);
+          await this.rotateRight(node.parent.parent);
         }
       } else {
         let uncleNode = parentNode.parent.left;
@@ -286,11 +283,11 @@ class RedBlackTree {
           node = node.parent.parent;
         } else if (node === node.parent.left) {
           node = node.parent;
-          this.rotateRight(node);
+          await this.rotateRight(node);
         } else {
           node.parent.color = TreeNodeColor.Black;
           node.parent.parent.color = TreeNodeColor.Red;
-          this.rotateLeft(node.parent.parent);
+          await this.rotateLeft(node.parent.parent);
         }
       }
       return {
@@ -313,21 +310,21 @@ class RedBlackTree {
     }
   }
 
-  rotateLeft = (node: TreeNode): TreeNode => {
+  rotateLeft = async (node: TreeNode): Promise<TreeNode> => {
     let rightNode = node.right;
     let rightNodeLeft = rightNode.left;
     let oldNodePostion = node.position;
     node.rightLine.remove();
     node.right = rightNodeLeft;
     let leftChildPos = this.getChildPosByParent(node, 'left');
-    this.moveAllNode(node, leftChildPos, 'down', false);
+    await this.moveAllNode(node, leftChildPos, 'down', false);
     if (rightNodeLeft) {
       rightNode.left = null;
       rightNode.leftLine.remove();
       rightNodeLeft.parent = node;
       drawLineBetweenNodes(node, rightNodeLeft, this.layer);
     }
-    this.moveAllNode(rightNode, oldNodePostion, 'up', false);
+    await this.moveAllNode(rightNode, oldNodePostion, 'up', false);
     rightNode.left = node;
     drawLineBetweenNodes(rightNode, node, this.layer);
     if (node.parent) {
@@ -345,21 +342,21 @@ class RedBlackTree {
     return rightNode
   }
 
-  rotateRight = (node: TreeNode): TreeNode => {
+  rotateRight = async (node: TreeNode): Promise<TreeNode> => {
     let leftNode = node.left;
     let leftNodeRight = leftNode.right;
     let oldNodePostion = node.position;
     node.leftLine.remove();
     node.left = leftNodeRight;
     let rightNodePos = this.getChildPosByParent(node, 'right');
-    this.moveAllNode(node, rightNodePos, 'down', false);
+    await this.moveAllNode(node, rightNodePos, 'down', false);
     if (leftNodeRight) {
       leftNode.right = null;
       leftNode.leftLine.remove();
       leftNodeRight.parent = node;
       drawLineBetweenNodes(node, leftNodeRight, this.layer);
     }
-    this.moveAllNode(leftNode, oldNodePostion, 'up', false);
+    await this.moveAllNode(leftNode, oldNodePostion, 'up', false);
     leftNode.right = node;
     drawLineBetweenNodes(leftNode, node, this.layer);
     if (node.parent) {
@@ -411,28 +408,28 @@ class RedBlackTree {
     return eles
   }
 
-  moveAllNode = (node: TreeNode, pos: [number, number], dir: 'up' | 'down', needDrawLine: boolean) => {
+  moveAllNode = async (node: TreeNode, pos: [number, number], dir: 'up' | 'down', needDrawLine: boolean) => {
     if (!node) return;
     if (dir === 'up') {
       node.level--;
     } else {
       node.level++;
     }
-    node.position = pos;
+    await node.changePos(pos);
     needDrawLine && drawLineBetweenNodes(node.parent, node, this.layer);
     node.left && this.moveAllNode(node.left, this.getChildPosByParent(node, 'left'), dir, true);
     node.right && this.moveAllNode(node.right, this.getChildPosByParent(node, 'right'), dir, true);
   }
 
-  removeNode = (node: TreeNode) => {
+  removeNode = async (node: TreeNode) => {
     if (node === this.root) {
       if (node.left) {
         this.root = node.left;
-        this.moveAllNode(this.root, [this.startPX, this.startPY], 'up', false);
+        await this.moveAllNode(this.root, [this.startPX, this.startPY], 'up', false);
         node.parent = null;
       } else if (node.right) {
         this.root = node.right;
-        this.moveAllNode(this.root, [this.startPX, this.startPY], 'up', false);
+        await this.moveAllNode(this.root, [this.startPX, this.startPY], 'up', false);
         node.parent = null;
       } else {
         this.root = null;
@@ -444,12 +441,12 @@ class RedBlackTree {
           node.parent.left = node.left;
           node.left.parent = node.parent;
           node.leftLine.remove();
-          this.moveAllNode(node.left, nodePos, 'up', false);
+          await this.moveAllNode(node.left, nodePos, 'up', false);
         } else if (node.right) {
           node.parent.left = node.right;
           node.right.parent = node.parent;
           node.rightLine.remove();
-          this.moveAllNode(node.right, nodePos, 'up', false);
+          await this.moveAllNode(node.right, nodePos, 'up', false);
         } else {
           node.parent.leftLine.remove();
           node.parent.left = null;
@@ -459,12 +456,12 @@ class RedBlackTree {
           node.parent.right = node.left;
           node.left.parent = node.parent;
           node.leftLine.remove();
-          this.moveAllNode(node.left, nodePos, 'up', false);
+          await this.moveAllNode(node.left, nodePos, 'up', false);
         } else if (node.right) {
           node.parent.right = node.right;
           node.right.parent = node.parent;
           node.rightLine.remove();
-          this.moveAllNode(node.right, nodePos, 'up', false);
+          await this.moveAllNode(node.right, nodePos, 'up', false);
         } else {
           node.parent.rightLine.remove();
           node.parent.right = null;

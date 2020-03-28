@@ -46,6 +46,13 @@ class TreeNode {
     return this.ele.getAttribute('fillColor');
   }
 
+  public changePos(pos: [number, number]) {
+    return Promise.all([
+      this.ele.transition(0.2).attr({ pos }),
+      this.textEle.transition(0.2).attr({ pos: [pos[0] - 25, pos[1] - 25] })
+    ])
+  }
+
   public set color(color: TreeNodeColor) {
     this.ele.setAttribute('fillColor', color);
   }
